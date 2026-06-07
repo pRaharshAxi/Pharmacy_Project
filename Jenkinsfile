@@ -18,8 +18,8 @@ pipeline {
         stage('3. Container Compilation Test') {
             steps {
                 echo 'Testing Docker compilation integrity...'
-                // We pass the host flag directly here, which completely forces it to ignore any cached TLS environment variables
-                sh 'docker -H tcp://docker-daemon:2375 build -t pharmacy_web:test .'
+                // We hard-clear the TLS variables inline right before executing the build
+                sh 'export DOCKER_TLS_VERIFY="" && export DOCKER_CERT_PATH="" && docker -H tcp://docker-daemon:2375 build -t pharmacy_web:test .'
             }
         }
 
