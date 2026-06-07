@@ -2,12 +2,10 @@ pipeline {
     agent any
 
     environment {
-        // Tells the CLI to use TLS encryption
-        DOCKER_TLS_VERIFY = '1'
-        // Points the CLI to the shared certificates volume directory
-        DOCKER_CERT_PATH  = '/certs/client'
-        // Points the CLI to the companion sidecar network port instead of localhost
-        DOCKER_HOST       = 'tcp://docker-daemon:2376'
+        // 1. Turn off TLS verification requirements for the CLI
+        DOCKER_TLS_VERIFY = ''
+        // 2. Point to the standard, unencrypted TCP port (2375) instead of the secure one (2376)
+        DOCKER_HOST       = 'tcp://docker-daemon:2375'
     }
 
     stages {
