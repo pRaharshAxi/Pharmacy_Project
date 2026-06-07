@@ -1,13 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        // 1. Turn off TLS verification requirements for the CLI
-        DOCKER_TLS_VERIFY = ''
-        // 2. Point to the standard, unencrypted TCP port (2375) instead of the secure one (2376)
-        DOCKER_HOST       = 'tcp://docker-daemon:2375'
-    }
-
     stages {
         stage('1. Code Checkout') {
             steps {
@@ -25,7 +18,8 @@ pipeline {
         stage('3. Container Compilation Test') {
             steps {
                 echo 'Testing Docker compilation integrity...'
-                sh 'docker build -t pharmacy_web:test .'
+                // We pass the host flag directly here, which completely forces it to ignore any cached TLS environment variables
+                sh 'docker -H tcp://docker-daemon:2375 build -t pharmacy_web:test .'
             }
         }
 
