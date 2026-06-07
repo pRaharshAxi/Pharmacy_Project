@@ -1,16 +1,10 @@
 pipeline {
     agent any
-    
-    // This tells Jenkins to look for and use the Docker CLI tools
-    tools {
-        dockerTool 'Moby-Docker-CLI'
-    }
 
     stages {
         stage('1. Code Checkout') {
             steps {
                 echo 'Pulling latest Pharmacy code from repository...'
-                // Checked out implicitly by SCM, no extra commands needed
             }
         }
 
@@ -24,7 +18,7 @@ pipeline {
         stage('3. Container Compilation Test') {
             steps {
                 echo 'Testing Docker compilation integrity...'
-                // Compiles cleanly via the sidecar daemon now
+                // This will now execute seamlessly using the container's native CLI
                 sh 'docker build -t pharmacy_web:test .'
             }
         }
