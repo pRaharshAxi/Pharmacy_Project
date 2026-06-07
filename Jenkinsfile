@@ -18,8 +18,12 @@ pipeline {
         stage('3. Container Compilation Test') {
             steps {
                 echo 'Testing Docker compilation integrity...'
-                // We hard-clear the TLS variables inline right before executing the build
-                sh 'export DOCKER_TLS_VERIFY="" && export DOCKER_CERT_PATH="" && docker -H tcp://docker-daemon:2375 build -t pharmacy_web:test .'
+                sh '''
+                    unset DOCKER_TLS_VERIFY
+                    unset DOCKER_CERT_PATH
+                    unset DOCKER_HOST
+                    docker -H tcp://docker-daemon:2375 build -t pharmacy_web:test .
+                '''
             }
         }
 
