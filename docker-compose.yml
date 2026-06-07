@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Service 1: The MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: pharmacy_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: medcare
+      MYSQL_USER: pharmacy_user
+      MYSQL_PASSWORD: pharmacy_password
+    ports:
+      - "3306:3306"
+    volumes:
+      # Automatically initializes the database using your SQL script
+      - ./sql:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
+
+  # Service 2: Your PHP Application
+  web:
+    build: .
+    container_name: pharmacy_web
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    volumes:
+      # Mounts your entire local project folder into Apache's web root for live updates
+      - .:/var/www/html
+      # Mounts your prescription uploads so they persist locally
+      - ./uploads:/var/www/html/uploads
+  
+  # Service 3: Jenkins Automation Server
+  # Enterprise Automation Engine Setup
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: pharmacy_jenkins
+    privileged: true
+    user: root
+    ports:
+      - "8082:8080"
+      - "50000:50000"
+    environment:
+      - DOCKER_HOST=tcp://docker:2376
+      - DOCKER_TLS_VERIFY=1
+      - DOCKER_CERT_PATH=/certs/client
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client:ro
+    depends_on:
+      - docker-daemon
+
+  # Isolated Docker Daemon Sidecar for Jenkins Builds
+  docker-daemon:
+    image: docker:dind
+    container_name: jenkins_docker_daemon
+    privileged: true
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - jenkins-docker-certs:/certs/client
+    ports:
+      - "2376:2376"
+
+volumes:
+  mysql_data:
+  jenkins_data:
+  jenkins-docker-certs:
